@@ -1,30 +1,27 @@
 import pytest
 import allure
+
 from pages.text_box_page import TextBoxPage
 from faker import Faker
-
-fake = Faker()
 
 
 @allure.feature('TextBoxPage')
 @pytest.fixture(scope="function")
-def textbox_page(browser):
-    page = TextBoxPage(browser)
+def textbox_page(driver):
+    page = TextBoxPage(driver)
     with allure.step('Open Home page'):
         page.open()
     return page
 
+
 @allure.story('Input data')
 @allure.title('Input user data')
 def test_reg(textbox_page):
-    # username = fake.name()
-    # email = fake.email()
-    # current_address = fake.address()
-    # permanent_address = fake.address()
-    username = '111'
-    email = 'test'
-    current_address = 'test'
-    permanent_address = 'test'
+    fake = Faker()
+    username = fake.name()
+    email = fake.email()
+    current_address = fake.address()
+    permanent_address = fake.address()
 
     with allure.step('Enter user data'):
         with allure.step('Enter username'):
@@ -40,11 +37,17 @@ def test_reg(textbox_page):
         textbox_page.submit_button().click()
 
     with allure.step('Verify success message'):
-        success_name_text = textbox_page.success_text_name().text
-        assert username in success_name_text, f"Expected {username} to be in {success_name_text}"
-        success_email_text = textbox_page.success_text_email().text
-        assert email in success_email_text, f"Expected {email} to be in {success_email_text}"
-        success_current_address_text = textbox_page.success_text_current_address().text
-        assert current_address in success_current_address_text, f"Expected {current_address} to be in {success_current_address_text}"
-        success_permanent_address_text = textbox_page.success_text_permanent_address().text
-        assert permanent_address in success_permanent_address_text, f"Expected {permanent_address} to be in {success_permanent_address_text}""Expected {permanent_address} to be in {success_permanent_address_text}"
+        assert username in textbox_page.success_text_name().text, \
+            f"Expected '{username}' to be in '{textbox_page.success_text_name().text}'"
+
+        assert email in textbox_page.success_text_email().text, \
+            f"Expected '{email}' to be in '{textbox_page.success_text_email().text}'"
+
+        # Убираем переносы строк и пробелы до и после адреса
+        assert current_address.replace('\n', ' ') in textbox_page.success_text_current_address().text.replace('\n',
+                                                                                                              ' '), \
+            f"Expected '{current_address}' to be in '{textbox_page.success_text_current_address().text}'"
+
+        assert permanent_address.replace('\n', ' ') in textbox_page.success_text_permanent_address().text.replace('\n',
+                                                                                                                  ' '), \
+            f"Expected '{permanent_address}' to be in '{textbox_page.success_text_permanent_address().text}'"
